@@ -35,4 +35,23 @@ export class SpeechRecognition {
       this.speech.start() 
     };
   }
+
+  // https://webaudio.github.io/web-speech-api/#dom-speechrecognition-start-audiotrack
+  streamStartWithTrack(track : MediaStreamTrack) {
+    // @ts-ignore chromeのみ対応．typesが対応できてない
+    this.speech.start(track);
+
+    // 一度止めて解析した後再開することでstream処理になる
+    this.speech.onresult = (e) => {
+      this.speech.stop();
+      if(e.results[0].isFinal){
+        const autotext =  e.results[0][0].transcript
+        console.info(`${this.logHeader} transcript: ${autotext}`);
+        this.onTranscript.emit({ transcript: autotext });
+      }
+    }
+    this.speech.onend = () => { 
+      this.speech.start() 
+    };
+  }
 }

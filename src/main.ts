@@ -8,12 +8,19 @@ const btn = document.getElementById('btn');
 const content = document.getElementById('content');
 const audioInputSelect = document.getElementById('audio-input-select') as HTMLSelectElement
 const audioInputSubmit = document.getElementById('audio-input-submit') as HTMLButtonElement
+let mediaStreamTrack = null as MediaStreamTrack | null
 
 if(!btn || !content || !audioInputSelect || !audioInputSelect) throw new Error('element not found');
 
 btn.addEventListener('click' , () => {
   console.log('start');
-  speechRecognition.streamStart();
+  // こちらはデフォルトのデバイスを使っているらしい
+  // speechRecognition.streamStart();
+
+  // startの引数が動くかの確認
+  if(mediaStreamTrack){
+    speechRecognition.streamStartWithTrack(mediaStreamTrack);
+  }
 });
 
 speechRecognition.onTranscript.addListener((obj) => {
@@ -46,16 +53,8 @@ const getDevices = async () => {
       audio: { deviceId: selectedId }
     }).then((stream) => {
       console.log("set audio device", selectedId, stream);
-      // この後にspeechRecognitionを初期化する必要あり？ -> 切り替わってないように見える
-      // const speechRecognition = new SpeechRecognition();
-      // btn.addEventListener('click' , () => {
-      //   console.log('start');
-      //   speechRecognition.streamStart();
-      // });
-      
-      // speechRecognition.onTranscript.addListener((obj) => {
-      //   console.log(obj);
-      // });
+      const track = stream.getAudioTracks()[0]
+      mediaStreamTrack = track
     });
   })
 })();
